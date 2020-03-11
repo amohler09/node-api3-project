@@ -2,6 +2,7 @@ const express = require('express');
 
 const server = express();
 
+server.use(logger);
 server.use(express.json());
 
 server.get('/', (req, res) => {
@@ -10,6 +11,10 @@ server.get('/', (req, res) => {
 
 //custom middleware
 
-function logger(req, res, next) {}
+function logger(req, res, next) {
+  console.log(`${req.method} method used at route ${req.originalUrl} on ${Date()}`)
+
+  next();
+}
 
 module.exports = server;
