@@ -130,8 +130,6 @@ function validateUserId(req, res, next) {
   next();
 };
 
-//what makes a user a user?
-//  things can't be empty
 function validateUser(req, res, next) {
   if (req.body.name === "") {
     res.status(400).json({ message: "Missing required name field" });
