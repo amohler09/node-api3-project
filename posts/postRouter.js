@@ -32,11 +32,36 @@ router.get('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  // do your magic!
+  const id = req.params.id;
+  Posts.remove(id)
+    .then(posts => {
+      if (posts > 0) {
+        res.status(200).json({ message: "Post has been deleted" });
+      } else {
+        res.status(404).json({ message: "Post not found, check the ID and try again" });
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ message: "Error deleting post"})
+    })
 });
 
 router.put('/:id', (req, res) => {
-  // do your magic!
+  const id = req.params.id;
+  Posts.update(id, req.body)
+    .then(posts => {
+      console.log(posts);
+      if (posts) {
+        res.status(200).json({ message: "Post has been updated" });
+      } else {
+        res.status(500).json({ message: "Could not find a post with that ID"});
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ message: "Error updating post" });
+    })
 });
 
 // custom middleware
