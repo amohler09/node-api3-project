@@ -5,7 +5,7 @@ const Posts = require('../posts/postDb')
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
   Users.insert(req.body)
     .then(user => {
       res.status(201).json(user);
@@ -16,7 +16,7 @@ router.post('/', (req, res) => {
     })
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   const id = req.params.id;
   if (req.body.user_id === id) {
     Posts.insert(req.body)
@@ -43,9 +43,9 @@ router.get('/', (req, res) => {
     })
 });
 
-router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  Users.getById(id)
+router.get('/:id', validateUserId, (req, res) => {
+  
+  Users.getById(req.params.id)
     .then(user => {
       if (user) {
         res.status(200).json(user);
@@ -59,7 +59,7 @@ router.get('/:id', (req, res) => {
     })
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, (req, res) => {
   const id = req.params.id;
   Users.getUserPosts(id)
     .then(post => {
@@ -80,7 +80,7 @@ router.get('/:id/posts', (req, res) => {
 });
 
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   const id = req.params.id;
   Users.remove(id)
     .then(users => {
@@ -96,7 +96,7 @@ router.delete('/:id', (req, res) => {
     })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUserId, (req, res) => {
   const id = req.params.id;
   Users.update(id, req.body)
     .then(user => {
@@ -115,21 +115,44 @@ router.put('/:id', (req, res) => {
 //custom middleware
 
 function validateUserId(req, res, next) {
-  if (req.params.id === req.body.id) {
-    req.user = id;
-  } else {
-    res.status(400).json({ message: "Invalid user ID" });
-  }
+  Posts.getById(req.params.id)
+    .then(user => {
+      if (user) {
+        req.user = user;
+      } else {
+        res.status(400).json({ message: "Invalid user ID"});
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ message: "Error finding user"});
+    })
 
   next();
 };
 
+//what makes a user a user?
+//  things can't be empty
 function validateUser(req, res, next) {
-  // do your magic!
+  if (req.body) {
+    body = req.body
+  } else if (!req.body.name) {
+    res.status(400).json({ message: "Missing required name field" });
+  } else {
+    res.status(400).json({ message: "Missing user data" });
+  }
+  next();
 }
 
 function validatePost(req, res, next) {
-  // do your magic!
+  if (req.body) {
+    body = req.body;
+  } else if (!req.body.text) {
+    res.status(400).json({ message: "Missing required text field" })
+  } else {
+    res.status(400).json({ message: "Missing post data" })
+  }
+  next();
 }
 
 module.exports = router;
