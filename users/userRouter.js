@@ -17,8 +17,7 @@ router.post('/', validateUser, (req, res) => {
 });
 
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
-  const id = req.params.id;
-  if (req.body.user_id === id) {
+  if (req.body.user_id === req.params.id) {
     Posts.insert(req.body)
       .then(post => {
         res.status(201).json(post);
@@ -134,11 +133,9 @@ function validateUserId(req, res, next) {
 //what makes a user a user?
 //  things can't be empty
 function validateUser(req, res, next) {
-  if (req.body) {
-    body = req.body
-  } else if (!req.body.name) {
+  if (req.body.name === "") {
     res.status(400).json({ message: "Missing required name field" });
-  } else {
+  } else if (!req.body) {
     res.status(400).json({ message: "Missing user data" });
   }
   next();
